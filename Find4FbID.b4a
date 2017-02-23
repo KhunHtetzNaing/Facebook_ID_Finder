@@ -1,0 +1,95 @@
+﻿Version=6.5
+NumberOfModules=0
+Build1=Default,com.htetznaing.fbidfinder
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: http://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="5" android:targetSdkVersion="19"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~'End of default text.~\n~~\n~'************ Google Play Services Base ************~\n~AddApplicationText(~\n~   <activity android:name="com.google.android.gms.common.api.GoogleApiActivity"~\n~  android:theme="@android:style/Theme.Translucent.NoTitleBar"~\n~  android:exported="false"/>~\n~    <meta-data~\n~  android:name="com.google.android.gms.version"~\n~  android:value="@integer/google_play_services_version" />~\n~)~\n~'************ Google Play Services Base (end) ************~\n~'************ Firebase Ads ************~\n~AddApplicationText(~\n~  <activity~\n~  android:name="com.google.android.gms.ads.AdActivity"~\n~  android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"~\n~  android:theme="@android:style/Theme.Translucent" />~\n~  <activity android:name="com.google.android.gms.ads.purchase.InAppPurchaseActivity"~\n~  android:theme="@style/Theme.IAPTheme"/>~\n~)~\n~'************ Firebase Ads (end) ************
+IconFile=
+NumberOfFiles=0
+NumberOfLibraries=3
+Library1=core
+Library2=webviewsettings
+Library3=firebaseadmob
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: Facebook ID Finder
+	#VersionCode: 1
+	#VersionName: 1.0
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: unspecified
+	#CanInstallToExternalStorage: False
+#End Region
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: False
+#End Region
+Sub Process_Globals
+Dim t As Timer
+End Sub
+
+Sub Globals
+	Dim webView1 As WebView
+	Dim wvx As WebViewSettings
+	Dim bn As AdView
+	Dim it As InterstitialAd
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+	webView1.Initialize("webView1")
+	Activity.AddView(webView1,0,0,100%x,100%y)
+	webView1.LoadUrl("http://4fbid.blogspot.com")
+	wvx.setDisplayZoomControls(webView1,False)
+	
+	bn.Initialize2("bn","ca-app-pub-4173348573252986/8410444554",bn.SIZE_SMART_BANNER)
+	Dim height As Int
+	If GetDeviceLayoutValues.ApproximateScreenSize < 6 Then
+		'phones
+		If 100%x > 100%y Then height = 32dip Else height = 50dip
+	Else
+		'tablets
+		height = 90dip
+	End If
+	Activity.AddView(bn, 0dip, 100%y - height, 100%x, height)
+	bn.LoadAd
+	
+	it.Initialize("it","ca-app-pub-4173348573252986/2363910950")
+	it.LoadAd
+	
+	t.Initialize("t",100)
+	t.Enabled = False
+	Activity.AddMenuItem("Refresh","rf")
+	Activity.AddMenuItem("Exit App","ex")
+End Sub
+
+Sub rf_Click
+	webView1.LoadUrl(webView1.Url)
+End Sub
+
+Sub ex_Click
+	Activity.Finish
+End Sub
+
+Sub webView1_OverrideUrl(Url As String) As Boolean
+	Log(Url)
+	t.Enabled = True
+End Sub
+
+Sub Activity_KeyPress (KeyCode As Int) As Boolean 
+	If KeyCode = KeyCodes.KEYCODE_BACK Then 
+			webView1.Back
+			Return True
+		t.Enabled = True
+	End If
+End Sub
+
+Sub t_Tick
+	If it.Ready Then it.Show Else it.LoadAd
+	t.Enabled = False
+End Sub
+
+Sub it_AdClosed
+	it.LoadAd
+End Sub
+
+Sub Activity_Resume
+
+End Sub
